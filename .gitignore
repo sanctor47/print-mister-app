@@ -1,3 +1,5 @@
 .idea/*
 
 *.pyc
+print_mister/settings/local.py
+
