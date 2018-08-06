@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style/style.css' %}" />
+    <script src="{% static 'base/scripts/jquery.min.js' %}"></script>
 </head>
 <body>
     <div id="header">
@@ -17,9 +18,19 @@
    {% endif %}
   </ul>
     </div>
+    {% if messages %}
+    <div id="system_messages">
+        <ul>
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
     <div id="content">
       {% block content %}
       {% endblock %}
     </div>
+{% block scripts %}{% endblock %}
 </body>
 </html>

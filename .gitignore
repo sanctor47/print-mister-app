@@ -2,4 +2,4 @@
 
 *.pyc
 print_mister/settings/local.py
-
+print_mister/media/*

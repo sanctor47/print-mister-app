@@ -1,0 +1,147 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<h2>Create order</h2>
+<form method="post" action="." enctype="multipart/form-data">
+    {% csrf_token %}
+    <div>
+        <label>Delivery type:</label>
+        <select name="delivery_type">
+            {% for delivery_type in delivery_types %}
+                <option value="{{delivery_type.0}}"> {{delivery_type.1}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label>Delivery address</label>
+        <textarea name="delivery_address"></textarea>
+    </div>
+    <div>
+        <label>Comment</label>
+        <textarea name="comment"></textarea>
+    </div>
+    <div id="models_div">
+    </div>
+    <div><div style="color: blue" id="add_model">Add Model</div></div>
+    <input type="submit" value="Order!">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var MATERIALS = [
+        {% for material in materials %}
+            {
+                "value": "{{material.material.id}}",
+                "text": "{{material.material.title}}",
+                "colours": [
+                    {% for colour in material.colours %}
+                        {
+                            "value": "{{colour.id}}",
+                            "text": "{{colour.title}}"
+                        },
+                    {% endfor %}
+                ]
+            },
+        {% endfor %}
+    ];
+
+    var LAYER_HEIGHTS = [
+        {% for height in layer_heights %}
+            {
+                "value": "{{height.0}}",
+                "text": "{{height.1}}"
+            },
+        {% endfor %}
+    ];
+    var INFILLS = [
+        {% for infill in infills %}
+            {
+                "value": "{{infill.0}}",
+                "text": "{{infill.1}}"
+            },
+        {% endfor %}
+    ];
+    var SHELLS = [
+        {% for shell in shells %}
+            {
+                "value": "{{shell.0}}",
+                "text": "{{shell.1}}"
+            },
+        {% endfor %}
+    ]
+
+
+</script>
+<script>
+    var modelIndex = 0;
+    var addModelForm = function(){
+        var modelIndexStr = 'models[' + modelIndex + ']';
+        var htmlStr = '' +
+            '<div>' +
+                '<input name="' + modelIndexStr + '.model_file" type="file">' +
+                '<label>Count</label><input type="number" name="' + modelIndexStr + '.count" value="1" min="1" max="30">' +
+                '<div><label>Material</label><select name="' + modelIndexStr + '.material" class="material_select">';
+        for (var i=0; i<MATERIALS.length; i++){
+            htmlStr+= '<option value="' + MATERIALS[i].value + '">' + MATERIALS[i].text + '</option>'
+        };
+
+        htmlStr+= '</select>' +
+                '<label>Colour</label>'+
+                '<select name="' + modelIndexStr + '.colour"  class="colour_select">';
+
+        for (var i=0; i<MATERIALS[0].colours.length; i++){
+            htmlStr+= '<option value="' + MATERIALS[0].colours[i].value + '">' + MATERIALS[0].colours[i].text + '</option>'
+        };
+        htmlStr+= '</select>' +
+                '<div><label>Layer height</label><select name="' + modelIndexStr + '.layer_height">';
+
+        for (var i=0; i<LAYER_HEIGHTS.length; i++){
+            htmlStr+= '<option value="' + LAYER_HEIGHTS[i].value + '">' + LAYER_HEIGHTS[i].text + '</option>'
+        };
+
+        htmlStr+= '</select>' +
+                '<div><label>Infills</label><select name="' + modelIndexStr + '.infills">';
+
+        for (var i=0; i<INFILLS.length; i++){
+            htmlStr+= '<option value="' + INFILLS[i].value + '">' + INFILLS[i].text + '</option>'
+        };
+
+
+        htmlStr+= '</select>' +
+                '<div><label>Shells</label><select name="' + modelIndexStr + '.shells">';
+
+        for (var i=0; i<SHELLS.length; i++){
+            htmlStr+= '<option value="' + SHELLS[i].value + '">' + SHELLS[i].text + '</option>'
+        };
+
+
+        htmlStr+= '</select></div>' +
+                '<div>' +
+                    '<label>Comment</label>' +
+                    '<textarea name="' + modelIndexStr + '.comment"></textarea>' +
+                '</div>' +
+            '</div>';
+        $('#models_div').append(htmlStr);
+        modelIndex++;
+    }
+    $( document ).ready(function(){
+        addModelForm();
+        $('#add_model').click(addModelForm);
+        $(document).on('change', '.material_select',  function(e){
+            var colorSelect = $(e.target).parent().children('.colour_select')[0];
+            var htmlStr = "";
+            var material;
+            for (var i=0; i<MATERIALS.length; i++){
+                if(MATERIALS[i].value == e.target.value)
+                    material = MATERIALS[i];
+            }
+            for (var i=0; i<material.colours.length; i++){
+                htmlStr+= '<option value="' + material.colours[i].value + '">' + material.colours[i].text + '</option>'
+            };
+            $(colorSelect).html(htmlStr);
+        })
+    })
+</script>
+{% endblock %}

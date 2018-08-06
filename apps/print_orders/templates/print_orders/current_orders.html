@@ -1,0 +1,43 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div>
+{% for order in orders %}
+    <div class="history_order">
+        <h3>Order #{{order.id}} ({{order.get_status_display}})</h3>
+        {% if order.can_user_confirm %}
+            <form action="{% url 'print_orders_client_confirm' pk=order.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Confirm">
+            </form>
+        {% endif %}
+        <h4>Details</h4>
+        <p>Created at {{order.created_at}}</p>
+        {% if order.finish_date %}<p>Finished at {{order.finish_date}}</p>{% endif %}
+        <p>Delivery type: {{order.get_delivery_type_display}}</p>
+        {% if order.delivery_address %}
+        <p>Delivery address: {{order.delivery_address}}</p>
+        {% endif %}
+        {% if order.comment %}<p>Comment: {{order.comment}}</p>{% endif %}
+        <div>
+            <h4>Order Items</h4>
+            {% for item in order.items.all %}
+                <div>
+                    <h5>Item #{{ forloop.counter }}</h5>
+                    <p>Colour: {{item.colour}}</p>
+                    <p>Material: {{item.material}}</p>
+                    <p>Count: {{item.count}}</p>
+                    <p>Price per one: {{item.one_item_price}}</p>
+                    <p>Total price: {{ item.total_price }}</p>
+                    <p>Layer_height: {{ item.layer_height }}</p>
+                    <p>Infill: {{ item.infill }}</p>
+                    <p>Shells: {{ item.shells }}</p>
+                    {% if item.comment %}<p>Comment: {{ item.comment }}</p>{% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endblock %}

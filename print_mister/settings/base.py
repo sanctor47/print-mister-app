@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'apps.pages',
     'apps.clients',
+    'apps.print_orders',
 
 ]
 
@@ -127,3 +128,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "../apps/static")
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
