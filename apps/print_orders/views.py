@@ -42,9 +42,9 @@ class CreatePrintOrderView(CreateView):
         if not order_form.is_valid():
             return HttpResponseBadRequest("error{}".format(order_form.errors))
         order = order_form.save()
-        count = 0
 
         # items processing
+        count = 0
         while True:
             if "models[{}].material".format(count) not in request.POST:
                 break
@@ -100,8 +100,8 @@ class PrintOrdersHistoryView(View):
         return render(request, 'print_orders/orders_history.html', {'orders': orders})
 
 
-class PrintOrderConfirm(UpdateView):
-    def post(self, request, pk, **kwargs):
+class PrintOrderConfirmView(UpdateView):
+    def post(self, request, pk=None, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponse(status_code=401)
         client = request.user.client
