@@ -3,7 +3,7 @@ from django.views.generic import View, UpdateView, CreateView
 from django.http.response import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from django.contrib import messages
 
-from .models import PrintOrder, Material, MaterialColour, PrintOrderItem
+from .models import PrintOrder, Material, MaterialColour, PrintOrderItem, PrintOrderLog
 from .forms import ModelFileCreateForm, PrintOrderItemCreateForm, PrintOrderCreateForm
 
 
@@ -74,6 +74,8 @@ class CreatePrintOrderView(CreateView):
                 return HttpResponseBadRequest("error{}".format(order_item_form.errors))
             order_item_form.save()
             count += 1
+
+        PrintOrderLog.create_log(order, client)
         messages.add_message(request, messages.INFO, "Order #{} was successfully created".format(order.pk))
         return redirect('current_print_orders')
 
@@ -107,9 +109,10 @@ class PrintOrderConfirm(UpdateView):
             order = PrintOrder.objects.get(pk=pk, client=client)
         except PrintOrder.DoesNotExist:
             return HttpResponseNotFound()
-        if order.can_user_confirm():
-            order.status = PrintOrder.STATUS.ORDER_CONFIRMED
-            order.save(update_fields=["status"])
-            return redirect('current_print_orders')
-        else:
+        if not order.can_user_confirm():
             return HttpResponseBadRequest()
+
+        order.status = PrintOrder.STATUS.ORDER_CONFIRMED
+        order.save(update_fields=["status"])
+        PrintOrderLog.create_log(order, client)
+        return redirect('current_print_orders')

@@ -1,5 +1,8 @@
+import json
+
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 
 from apps.clients.models import Client
 
@@ -139,3 +142,43 @@ class PrintOrderItem(models.Model):
             return self.one_item_price * self.count
         else:
             return None
+
+
+class PrintOrderLog(models.Model):
+    class USER_TYPES:
+        OPERATOR = 0
+        CLIENT = 1
+    USER_TYPES_CHOICES = (
+        (USER_TYPES.OPERATOR, "Operator"),
+        (USER_TYPES.CLIENT, "Client"),
+    )
+
+    class ACTION_TYPE:
+        CREATE = 0
+        CONFIRM = 20
+    ACTION_TYPE_CHOICES = (
+        (ACTION_TYPE.CREATE, "Create"),
+        (ACTION_TYPE.CONFIRM, "Confirm"),
+    )
+
+    order = models.ForeignKey(PrintOrder, verbose_name="Order", related_name="logs")
+    user_type = models.SmallIntegerField("User type", choices=USER_TYPES_CHOICES)
+    user_id = models.IntegerField("User Id")
+    action_type = models.SmallIntegerField("Action type", choices=ACTION_TYPE_CHOICES)
+    dump = models.TextField("Dump", null=True, blank=True)
+
+    @classmethod
+    def create_log(self, order, user):
+        log = PrintOrderLog()
+        log.order = order
+        if isinstance(user, Client):
+            log.user_type = self.USER_TYPES.CLIENT
+        #elif isinstance(user, Operator)
+        #   log.user_type = self.USER_TYPES.OPERATOR
+        log.user_id = user.pk
+        log.action_type = order.status
+        log.dump = json.dumps(
+            list(PrintOrder.objects.filter(id=order.id).values()),
+            cls=DjangoJSONEncoder
+        )
+        log.save()

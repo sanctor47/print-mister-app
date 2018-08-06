@@ -32,7 +32,14 @@ class PrintOrderAdmin(admin.ModelAdmin):
     inlines = (PrintOrderItemInlineAdmin, )
 
 
+class PrintOrderLogAdmin(admin.ModelAdmin):
+    search_fields = ("order__id",)
+    list_filter = ("action_type", )
+    list_display = ("id", "order_id", "action_type")
+
+
 admin.site.register(Material, MaterialAdmin)
 admin.site.register(MaterialColour, MaterialColourAdmin)
 admin.site.register(PrintOrder, PrintOrderAdmin)
 admin.site.register(ModelFile, ModelFileAdmin)
+admin.site.register(PrintOrderLog, PrintOrderLogAdmin)
