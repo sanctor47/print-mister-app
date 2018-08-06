@@ -1,0 +1,14 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<p>{{client.full_name}}</p>
+    <form action="" method="post">
+        {% csrf_token %}
+        <table>
+        {{ form }}
+        </table>
+        <input type="submit" value="Submit" />
+    </form>
+{% endblock %}

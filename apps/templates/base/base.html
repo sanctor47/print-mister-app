@@ -1,11 +1,25 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}" />
 </head>
 <body>
-  {% block content %}
-  {% endblock %}
+    <div id="header">
+        Sudotechs
+   {% if user.is_authenticated %}
+     <li>User: {{ user.get_username }}</li>
+     <li><a href="{% url 'auth_logout'%}?next={{request.path}}">Logout</a></li>
+   {% else %}
+     <li><a href="{% url 'auth_login'%}?next={{request.path}}">Login</a></li>
+   {% endif %}
+  </ul>
+    </div>
+    <div id="content">
+      {% block content %}
+      {% endblock %}
+    </div>
 </body>
 </html>

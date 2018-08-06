@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<p>full_name: {{client.full_name}}</p>
+<p>favourite_colour: {{client.favourite_colour}}</p>
+<p><a href="{% url 'client_profile_edit' %}">Change</a></p>
+{% endblock %}
