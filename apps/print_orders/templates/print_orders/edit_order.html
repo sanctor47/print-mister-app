@@ -2,29 +2,94 @@
 {% load i18n %}
 
 {% block content %}
-<h2>Create order</h2>
+<h2>Edit order #{{order.id}}</h2>
 <form method="post" action="." enctype="multipart/form-data">
     {% csrf_token %}
     <div>
         <label>Delivery type:</label>
         <select name="delivery_type">
             {% for delivery_type in delivery_types %}
-                <option value="{{delivery_type.0}}"> {{delivery_type.1}}</option>
+                <option value="{{delivery_type.0}}"
+                    {% if delivery_type.0 == order.delivery_type %}selected{% endif %}
+                > {{delivery_type.1}}</option>
             {% endfor %}
         </select>
     </div>
     <div>
         <label>Delivery address</label>
-        <textarea name="delivery_address"></textarea>
+        <textarea name="delivery_address">{{order.delivery_address}}</textarea>
     </div>
     <div>
         <label>Comment</label>
         <textarea name="comment"></textarea>
     </div>
-    <div id="models_div">
+    <div id="created_models_div">
+        {% for item in order.items.all %}
+            <div>
+                <div><label>Remove</label><input name="models#{{item.id}}.remove" type="checkbox"></div>
+                <div><input name="models#{{item.id}}.model_file" type="file"></div>
+                <div><label>Count</label><input type="number" name="models#{{item.id}}.count" value="{{item.count}}"></div>
+                <label>Material</label>
+                <select name="models#{{item.id}}.material" class="material_select">
+                    {% for material in materials %}
+                        <option value="{{material.material.id}}"
+                                {% if material.material.id == item.material_id %}selected{% endif %}
+                        >{{material.material.title}}</option>
+                    {% endfor %}
+                </select>
+                <label>Colour</label>
+                <select name="models#{{item.id}}.colour" class="colour_select">
+                    {% for material in materials %}
+                        {% if material.material.id == item.material_id %}
+                            {% for colour in material.colours %}
+                                <option value="{{colour.id}}"
+                                    {% if colour.id == item.colour_id %}selected{% endif %}
+                                >{{colour.title}}</option>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <div>
+                    <label>Layer height</label>
+                    <select name="models#{{item.id}}.layer_height">
+                        {% for layer_height in layer_heights %}
+                            <option value="{{layer_height.0}}"
+                                    {% if layer_height.0 == item.layer_height %}selected{% endif %}
+                            >{{layer_height.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Infills</label>
+                    <select name="models#{{item.id}}.infill">
+                        {% for infill in infills %}
+                            <option value="{{infill.0}}"
+                                    {% if infill.0 == item.infill %}selected{% endif %}
+                            >{{infill.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Shells</label>
+                    <select name="models#{{item.id}}.shells">
+                        {% for shell in shells %}
+                            <option value="{{shell.0}}"
+                                    {% if shell.0 == item.shells %}selected{% endif %}
+                            >{{shell.1}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label>Comment</label>
+                    <textarea name="models#{{item.id}}.comment">{{item.comment}}</textarea>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div id="new_models_div">
     </div>
     <div><div style="color: blue" id="add_model">Add Model</div></div>
-    <input type="submit" value="Order!">
+    <input type="submit" value="Save changes">
 </form>
 {% endblock %}
 
@@ -102,7 +167,7 @@
         };
 
         htmlStr+= '</select></div>' +
-                '<div><label>Infills</label><select name="' + modelIndexStr + '.infill">';
+                '<div><label>Infills</label><select name="' + modelIndexStr + '.infills">';
 
         for (var i=0; i<INFILLS.length; i++){
             htmlStr+= '<option value="' + INFILLS[i].value + '">' + INFILLS[i].text + '</option>'
@@ -123,11 +188,10 @@
                     '<textarea name="' + modelIndexStr + '.comment"></textarea>' +
                 '</div>' +
             '</div>';
-        $('#models_div').append(htmlStr);
+        $('#new_models_div').append(htmlStr);
         modelIndex++;
     }
     $( document ).ready(function(){
-        addModelForm();
         $('#add_model').click(addModelForm);
         $(document).on('change', '.material_select',  function(e){
             var colorSelect = $(e.target).parent().children('.colour_select')[0];

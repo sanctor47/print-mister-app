@@ -82,6 +82,9 @@ class PrintOrder(models.Model):
     def can_user_confirm(self):
         return self.status == self.STATUS.MODEL_ACCEPTED
 
+    def can_user_edit(self):
+        return self.status == self.STATUS.NEW
+
 
 class ModelFile(models.Model):
     client = models.ForeignKey(Client, verbose_name=u"Client")
@@ -155,9 +158,11 @@ class PrintOrderLog(models.Model):
 
     class ACTION_TYPE:
         CREATE = 0
+        EDITED_BY_CLIENT = 5
         CONFIRM = 20
     ACTION_TYPE_CHOICES = (
         (ACTION_TYPE.CREATE, "Create"),
+        (ACTION_TYPE.EDITED_BY_CLIENT, "Edited by client"),
         (ACTION_TYPE.CONFIRM, "Confirm"),
     )
 
@@ -168,7 +173,7 @@ class PrintOrderLog(models.Model):
     dump = models.TextField("Dump", null=True, blank=True)
 
     @classmethod
-    def create_log(self, order, user):
+    def create_log(self, order, user, action_type=None):
         log = PrintOrderLog()
         log.order = order
         if isinstance(user, Client):
@@ -176,9 +181,14 @@ class PrintOrderLog(models.Model):
         #elif isinstance(user, Operator)
         #   log.user_type = self.USER_TYPES.OPERATOR
         log.user_id = user.pk
-        log.action_type = order.status
+        log.action_type = action_type if action_type else order.status
         log.dump = json.dumps(
             list(PrintOrder.objects.filter(id=order.id).values()),
             cls=DjangoJSONEncoder
         )
+        for item in order.items.all():
+            log.dump += json.dumps(
+                list(PrintOrderItem.objects.filter(id=item .id).values()),
+                cls=DjangoJSONEncoder
+            )
         log.save()

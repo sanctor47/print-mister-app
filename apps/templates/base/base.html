@@ -13,6 +13,9 @@
    {% if user.is_authenticated %}
      <li>User: {{ user.get_username }}</li>
      <li><a href="{% url 'auth_logout'%}?next={{request.path}}">Logout</a></li>
+     <li><a href="{% url 'current_print_orders'%}">Current Orders</a></li>
+     <li><a href="{% url 'create_print_order'%}">Create Orders</a></li>
+     <li><a href="{% url 'print_orders_history'%}">Orders History</a></li>
    {% else %}
      <li><a href="{% url 'auth_login'%}?next={{request.path}}">Login</a></li>
    {% endif %}
